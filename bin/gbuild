@@ -70,9 +70,11 @@ def build_one_configuration(suite, arch, build_desc, reference_datetime)
   info "Preparing build environment"
   system! "on-target bash < target-bin/init-build.sh"
 
-  build_desc["files"].each do |filename|
-    filename = sanitize(filename, "files section")
-    system! "copy-to-target #{@quiet_flag} inputs/#{filename} build/"
+  if build_desc["files"]
+      build_desc["files"].each do |filename|
+        filename = sanitize(filename, "files section")
+        system! "copy-to-target #{@quiet_flag} inputs/#{filename} build/"
+      end
   end
 
   info "Updating apt-get repository (log in var/install.log)"
@@ -174,9 +176,11 @@ desc_sum = `sha256sum #{build_desc_file}`
 desc_sum = desc_sum.sub(build_desc_file, "#{package_name}-desc.yml")
 in_sums << desc_sum
 
-build_desc["files"].each do |filename|
-  filename = sanitize(filename, "files section")
-  in_sums << `cd inputs && sha256sum #{filename}`
+if build_desc["files"]
+    build_desc["files"].each do |filename|
+      filename = sanitize(filename, "files section")
+      in_sums << `cd inputs && sha256sum #{filename}`
+    end
 end
 
 commits = {}
